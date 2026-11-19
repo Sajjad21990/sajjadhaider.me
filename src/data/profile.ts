@@ -13,6 +13,7 @@ export const person = {
   x: 'https://x.com/Sajjad21990',
   // Public on purpose: shown on the contact page for WhatsApp.
   whatsapp: { display: '+91 70457 96217', href: 'https://wa.me/917045796217' },
+  tagline: 'I build web products end to end and run the cloud infrastructure under them.',
   intro:
     'I build web products end to end and run the cloud infrastructure under them. For the last five years that has meant TypeScript, React and Node.js on one side, and AWS, GCP and Terraform on the other.',
   now: 'I work at Reclaim Protocol (YC W21), where we build privacy-preserving verification on zkTLS. I write backend services and SDKs, look after the infrastructure and CI/CD, and serve as the team’s InfoSec officer.',

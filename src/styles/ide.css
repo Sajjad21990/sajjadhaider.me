@@ -24,7 +24,7 @@
   --step-1: 1.25rem;
   --step-2: 1.5rem;
   --step-3: clamp(1.9rem, 1.3rem + 2.2vw, 2.75rem);
-  --step-4: clamp(2.3rem, 1.2rem + 4.6vw, 4.25rem);
+  --step-4: 3.3rem;
 
   --radius: 8px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -532,22 +532,23 @@ kbd {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 27rem);
-  gap: clamp(28px, 5vw, 64px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+  gap: clamp(32px, 5vw, 72px);
   align-items: center;
-  padding: clamp(4px, 2vw, 28px) 0 clamp(12px, 3vw, 32px);
+  padding: clamp(0px, 2vw, 24px) 0 clamp(8px, 2vw, 24px);
 }
-.hero-now {
+.hero .hero-now {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  margin: 0 0 1.3rem;
+  margin: 0 0 1.5rem;
   font-family: var(--mono);
   font-size: 0.74rem;
   color: var(--muted);
 }
-.hero-now::before {
+.hero .hero-now::before {
   content: '';
+  flex: none;
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -558,24 +559,35 @@ kbd {
   font-family: var(--mono);
   font-size: var(--step-4);
   font-weight: 700;
-  line-height: 1.02;
+  font-size: clamp(1.2rem, 7.9cqi, 3.3rem);
+  line-height: 1.12;
   letter-spacing: -0.055em;
+  white-space: nowrap;
+}
+.hero-text {
+  container-type: inline-size;
+  min-width: 0;
 }
 .hero h1::before {
   content: none;
 }
-.hero-role {
-  margin: 1.1rem 0 0;
+.hero .hero-role {
+  margin: 1.4rem 0 0;
   font-family: var(--mono);
-  font-size: clamp(0.9rem, 0.8rem + 0.5vw, 1.1rem);
-  color: var(--accent);
-  letter-spacing: -0.02em;
-}
-.hero-intro {
-  margin: 1.1rem 0 0;
-  max-width: 34rem;
-  font-size: var(--step-1);
+  font-size: 0.95rem;
   line-height: 1.5;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+}
+.hero .hero-intro {
+  margin: 0.9rem 0 0;
+  max-width: 30rem;
+  font-size: 1.15rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.md .hero .actions {
+  margin-top: 2.2rem;
 }
 
 /* Code panel: a small editor window holding real, highlighted source */
@@ -1203,15 +1215,11 @@ a.status-item:hover,
   .md h2 {
     margin-top: 2.8rem;
   }
-  .hero-intro,
   .md .lede {
     font-size: 1.12rem;
   }
   .btn {
     padding: 12px 16px;
-  }
-  .hero-role {
-    margin-top: 1.3rem;
   }
   .hero .code {
     font-size: 0.66rem;
