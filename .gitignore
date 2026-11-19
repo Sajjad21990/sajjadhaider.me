@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.cv-build/
+# Private CV with phone number and internal numbers. Never commit or deploy.
+cv/
+.DS_Store
+.claude/

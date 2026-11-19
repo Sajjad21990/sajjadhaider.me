@@ -1,0 +1,279 @@
+---
+import '../styles/ide.css';
+import { files, person, resumeFile } from '../data/profile';
+
+interface Props {
+  file: string; // e.g. "README.md" or "projects/botfare.md"
+  title: string;
+  description: string;
+}
+const { file, title, description } = Astro.props;
+
+const pathOf = (f: (typeof files)[number]) => (f.dir ? `${f.dir}/${f.name}` : f.name);
+const current = files.find((f) => pathOf(f) === file);
+const rootFiles = files.filter((f) => !f.dir);
+const before = rootFiles.filter((f) => ['README.md', 'experience.md'].includes(f.name));
+const after = rootFiles.filter((f) => !['README.md', 'experience.md'].includes(f.name));
+const projectFiles = files.filter((f) => f.dir === 'projects');
+const crumbs = file.split('/');
+const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Martian+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script is:inline>
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+        if (localStorage.getItem('terminal') === 'closed') document.documentElement.dataset.terminal = 'closed';
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#editor">Skip to content</a>
+
+    <div class="ide">
+      <header class="titlebar">
+        <button class="menu-btn" type="button" aria-controls="explorer" aria-expanded="false" data-explorer-toggle>
+          Files
+        </button>
+        <span class="titlebar-path"><span class="titlebar-root">sajjadhaider.me</span>/{file}</span>
+      </header>
+
+      <nav class="explorer" id="explorer" aria-label="Files">
+        <p class="explorer-head">Explorer</p>
+        <ul class="tree">
+          <li>
+            <span class="tree-dir">sajjadhaider.me</span>
+            <ul>
+              {
+                before.map((f) => (
+                  <li>
+                    <a class="tree-file" href={f.href} aria-current={current === f ? 'page' : undefined} data-ext={f.name.split('.').pop()}>
+                      {f.name}
+                    </a>
+                  </li>
+                ))
+              }
+              <li>
+                <span class="tree-dir">projects</span>
+                <ul>
+                  {
+                    projectFiles.map((f) => (
+                      <li>
+                        <a class="tree-file" href={f.href} aria-current={current === f ? 'page' : undefined} data-ext="md">
+                          {f.name}
+                        </a>
+                      </li>
+                    ))
+                  }
+                </ul>
+              </li>
+              {
+                after.map((f) => (
+                  <li>
+                    <a class="tree-file" href={f.href} aria-current={current === f ? 'page' : undefined} data-ext={f.name.split('.').pop()}>
+                      {f.name}
+                    </a>
+                  </li>
+                ))
+              }
+              <li>
+                <a class="tree-file" href={resumeFile} data-ext="pdf">resume.pdf</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="tabs" role="navigation" aria-label="Open files">
+        {
+          files.map((f) => (
+            <a class="tab" href={f.href} aria-current={current === f ? 'page' : undefined} data-ext={f.name.split('.').pop()}>
+              {f.name}
+            </a>
+          ))
+        }
+      </div>
+
+      <main class="editor" id="editor" tabindex="-1">
+        <p class="crumbs" aria-hidden="true">
+          {crumbs.map((c, i) => <span class={i === crumbs.length - 1 ? 'crumb crumb-last' : 'crumb'}>{c}</span>)}
+        </p>
+        <slot />
+      </main>
+
+      <section class="terminal" aria-label="Terminal">
+        <div class="terminal-bar">
+          <span class="terminal-title">Terminal</span>
+          <button type="button" class="terminal-toggle" data-terminal-toggle aria-expanded="true">Hide</button>
+        </div>
+        <div class="terminal-body" data-terminal-body>
+          <div class="terminal-out" data-terminal-out aria-live="polite">
+            <p>Type <kbd>help</kbd> to see what this terminal can do.</p>
+          </div>
+          <form class="terminal-form" data-terminal-form autocomplete="off">
+            <label class="terminal-prompt" for="terminal-input">visitor@sajjadhaider.me $</label>
+            <input id="terminal-input" name="cmd" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" />
+          </form>
+        </div>
+      </section>
+
+      <footer class="statusbar">
+        <span class="status-item">{current?.lang ?? 'Plain text'}</span>
+        <span class="status-item status-hide-sm">{person.location}</span>
+        <span class="status-spacer"></span>
+        <button type="button" class="status-item status-btn" data-theme-toggle>Light theme</button>
+        <a class="status-item" href={resumeFile}>Download resume</a>
+        <a class="status-item status-hide-sm" href={person.github}>GitHub</a>
+      </footer>
+    </div>
+
+    <script is:inline define:vars={{ terminalFiles, resumeFile, email: person.email }}>
+      (function () {
+        var root = document.documentElement;
+
+        // Theme toggle
+        var themeBtn = document.querySelector('[data-theme-toggle]');
+        function labelTheme() {
+          themeBtn.textContent = root.dataset.theme === 'dark' ? 'Light theme' : 'Dark theme';
+        }
+        function setTheme(t) {
+          root.dataset.theme = t;
+          try { localStorage.setItem('theme', t); } catch (e) {}
+          labelTheme();
+        }
+        labelTheme();
+        themeBtn.addEventListener('click', function () {
+          setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+        });
+
+        // Explorer drawer (small screens)
+        var exBtn = document.querySelector('[data-explorer-toggle]');
+        exBtn.addEventListener('click', function () {
+          var open = root.dataset.explorer === 'open';
+          root.dataset.explorer = open ? 'closed' : 'open';
+          exBtn.setAttribute('aria-expanded', String(!open));
+        });
+
+        // Terminal show / hide
+        var termBtn = document.querySelector('[data-terminal-toggle]');
+        function labelTerm() {
+          var closed = root.dataset.terminal === 'closed';
+          termBtn.textContent = closed ? 'Show' : 'Hide';
+          termBtn.setAttribute('aria-expanded', String(!closed));
+        }
+        labelTerm();
+        termBtn.addEventListener('click', function () {
+          var closed = root.dataset.terminal === 'closed';
+          root.dataset.terminal = closed ? 'open' : 'closed';
+          try { localStorage.setItem('terminal', closed ? 'open' : 'closed'); } catch (e) {}
+          labelTerm();
+        });
+
+        // Terminal commands
+        var out = document.querySelector('[data-terminal-out]');
+        var form = document.querySelector('[data-terminal-form]');
+        var input = form.querySelector('input');
+        var history = [];
+        var cursor = 0;
+
+        function print(text, cls) {
+          var p = document.createElement('p');
+          if (cls) p.className = cls;
+          p.textContent = text;
+          out.appendChild(p);
+          out.scrollTop = out.scrollHeight;
+        }
+
+        function findFile(name) {
+          if (!name) return null;
+          var q = name.replace(/^\.?\//, '').toLowerCase();
+          for (var i = 0; i < terminalFiles.length; i++) {
+            var p = terminalFiles[i].path.toLowerCase();
+            var base = p.split('/').pop();
+            if (p === q || base === q || base.replace(/\.\w+$/, '') === q) return terminalFiles[i];
+          }
+          return null;
+        }
+
+        var commands = {
+          help: function () {
+            print('ls              list the files');
+            print('open <file>     open a file, for example: open experience');
+            print('resume          download the resume PDF');
+            print('email           show the email address');
+            print('theme           switch between dark and light');
+            print('clear           clear this terminal');
+          },
+          ls: function () {
+            terminalFiles.forEach(function (f) { print(f.path); });
+            print('resume.pdf');
+          },
+          open: function (arg) {
+            if (arg === 'resume.pdf' || arg === 'resume') return commands.resume();
+            var f = findFile(arg);
+            if (!f) return print('No file called "' + (arg || '') + '". Type ls to see the files.', 'err');
+            print('Opening ' + f.path);
+            location.href = f.href;
+          },
+          cat: function (arg) { commands.open(arg); },
+          cd: function (arg) { commands.open(arg); },
+          resume: function () {
+            print('Downloading resume.pdf');
+            location.href = resumeFile;
+          },
+          email: function () { print(email); },
+          whoami: function () { print('visitor'); },
+          theme: function () {
+            setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+            print('Theme is now ' + root.dataset.theme + '.');
+          },
+          clear: function () { out.innerHTML = ''; },
+        };
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var line = input.value.trim();
+          input.value = '';
+          if (!line) return;
+          history.push(line);
+          cursor = history.length;
+          print('$ ' + line, 'echo');
+          var parts = line.split(/\s+/);
+          var fn = commands[parts[0].toLowerCase()];
+          if (fn) fn(parts.slice(1).join(' '));
+          else print('Unknown command "' + parts[0] + '". Type help to see the commands.', 'err');
+        });
+
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'ArrowUp' && cursor > 0) {
+            cursor--; input.value = history[cursor]; e.preventDefault();
+          } else if (e.key === 'ArrowDown') {
+            cursor = Math.min(cursor + 1, history.length);
+            input.value = history[cursor] || ''; e.preventDefault();
+          }
+        });
+
+        // Keep the active tab in view on narrow screens
+        var activeTab = document.querySelector('.tab[aria-current="page"]');
+        if (activeTab && activeTab.scrollIntoView) activeTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,49 @@
+---
+import Ide from '../layouts/Ide.astro';
+import { person, projects, resumeFile } from '../data/profile';
+---
+
+<Ide
+  file="README.md"
+  title={`${person.name}, ${person.title}`}
+  description="Sajjad Haider Sayed is a full-stack and infrastructure engineer in Mumbai, working with TypeScript, React, Node.js, AWS, GCP and Terraform."
+>
+  <article class="md">
+    <h1>{person.name}</h1>
+    <p class="meta">{person.title}, {person.location}</p>
+    <p class="lede">{person.intro}</p>
+    <p>{person.now}</p>
+    <p>
+      Outside work I build things at hackathons, mostly where payments, access and cryptography meet, and I volunteer as a
+      developer for the <a href="https://anfaalfoundation.com">Anfaal Foundation</a>.
+    </p>
+
+    <h2>In this repository</h2>
+    <ul class="file-list">
+      <li>
+        <a href="/experience/">experience.md</a>
+        <span>Where I have worked and what I built there.</span>
+      </li>
+      {
+        projects.map((p) => (
+          <li>
+            <a href={`/projects/${p.slug}/`}>projects/{p.slug}.md</a>
+            <span>{p.oneLine}</span>
+          </li>
+        ))
+      }
+      <li>
+        <a href="/skills/">skills.json</a>
+        <span>The languages, frameworks and cloud tools I use.</span>
+      </li>
+      <li>
+        <a href="/contact/">contact.md</a>
+        <span>Email, GitHub and LinkedIn.</span>
+      </li>
+      <li>
+        <a href={resumeFile}>resume.pdf</a>
+        <span>All of this on one page.</span>
+      </li>
+    </ul>
+  </article>
+</Ide>

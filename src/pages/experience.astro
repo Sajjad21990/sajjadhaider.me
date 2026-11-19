@@ -1,0 +1,65 @@
+---
+import Ide from '../layouts/Ide.astro';
+import { education, experience, person, volunteering } from '../data/profile';
+---
+
+<Ide
+  file="experience.md"
+  title={`Experience | ${person.name}`}
+  description="Work history of Sajjad Haider Sayed: Reclaim Protocol, Nine Lights Technologies, TaskPro Services and freelance work."
+>
+  <article class="md">
+    <h1>Experience</h1>
+
+    {
+      experience.map((job) => (
+        <section>
+          <h3>
+            {job.role}, {job.url ? <a href={job.url}>{job.company}</a> : job.company}
+          </h3>
+          <p class="meta">
+            {job.period}, {job.place}
+          </p>
+          {job.about && <p class="about">{job.about}</p>}
+          <ul>
+            {job.bullets.map((b) => (
+              <li>{b.text}</li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+
+    <h2>Volunteering</h2>
+    {
+      volunteering.map((job) => (
+        <section>
+          <h3>
+            {job.role}, {job.url ? <a href={job.url}>{job.company}</a> : job.company}
+          </h3>
+          <p class="meta">
+            {job.period}, {job.place}
+          </p>
+          <ul>
+            {job.bullets.map((b) => (
+              <li>{b.text}</li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+
+    <h2>Education</h2>
+    {
+      education.map((e) => (
+        <section>
+          <h3>{e.title}</h3>
+          <p class="meta">
+            {e.where}, {e.when}
+            {e.note ? `, ${e.note}` : ''}
+          </p>
+        </section>
+      ))
+    }
+  </article>
+</Ide>

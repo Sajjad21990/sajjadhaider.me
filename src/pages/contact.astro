@@ -1,0 +1,40 @@
+---
+import Ide from '../layouts/Ide.astro';
+import { person, resumeFile } from '../data/profile';
+---
+
+<Ide
+  file="contact.md"
+  title={`Contact | ${person.name}`}
+  description="How to reach Sajjad Haider Sayed: email, GitHub and LinkedIn."
+>
+  <article class="md">
+    <h1>Contact</h1>
+    <p class="lede">Email is the fastest way to reach me.</p>
+
+    <ul class="file-list">
+      <li>
+        <a href={`mailto:${person.email}`}>{person.email}</a>
+        <span>Email</span>
+      </li>
+      <li>
+        <a href={person.github}>github.com/Sajjad21990</a>
+        <span>Side projects, hackathon builds and other code</span>
+      </li>
+      <li>
+        <a href={person.linkedin}>linkedin.com/in/sajjad21990</a>
+        <span>Work history</span>
+      </li>
+      <li>
+        <a href={person.x}>x.com/Sajjad21990</a>
+        <span>Demos and build notes</span>
+      </li>
+      <li>
+        <a href={resumeFile}>resume.pdf</a>
+        <span>One-page resume</span>
+      </li>
+    </ul>
+
+    <p class="meta">Based in {person.location} (UTC+5:30).</p>
+  </article>
+</Ide>

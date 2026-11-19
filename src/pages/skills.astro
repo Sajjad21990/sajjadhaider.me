@@ -1,0 +1,37 @@
+---
+import Ide from '../layouts/Ide.astro';
+import { person, skills } from '../data/profile';
+
+// Render the real object as JSON, one token-coloured line at a time.
+type Line = { indent: number; key?: string; str?: string; punct?: string };
+const lines: Line[] = [{ indent: 0, punct: '{' }];
+const groups = Object.entries(skills);
+groups.forEach(([key, values], gi) => {
+  lines.push({ indent: 1, key, punct: '[' });
+  values.forEach((v, vi) => lines.push({ indent: 2, str: v, punct: vi < values.length - 1 ? ',' : '' }));
+  lines.push({ indent: 1, punct: gi < groups.length - 1 ? '],' : ']' });
+});
+lines.push({ indent: 0, punct: '}' });
+---
+
+<Ide
+  file="skills.json"
+  title={`Skills | ${person.name}`}
+  description="Languages, frameworks and cloud tools Sajjad Haider Sayed works with."
+>
+  <h1 class="sr-only">Skills</h1>
+  <pre class="code" aria-label="skills.json">{lines.map((l) => (
+    <span class="code-line">{'  '.repeat(l.indent)}{l.key && <><span class="tok-key">"{l.key}"</span><span class="tok-punct">: </span></>}{l.str && <span class="tok-str">"{l.str}"</span>}{l.punct && <span class="tok-punct">{l.punct}</span>}</span>
+  ))}</pre>
+</Ide>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>

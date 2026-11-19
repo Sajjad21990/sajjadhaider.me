@@ -1,0 +1,14 @@
+{
+  "name": "sajjadhaider-me",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "pdf": "bash scripts/make-pdf.sh"
+  },
+  "dependencies": {
+    "astro": "^7.4.13"
+  }
+}

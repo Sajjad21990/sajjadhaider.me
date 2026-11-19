@@ -1,0 +1,149 @@
+---
+// Print layout for the resume PDF. Plain single column so applicant-tracking
+// systems can read it. Built twice by scripts/make-pdf.sh:
+//   default      -> public resume (no phone, no internal numbers)
+//   CV_FULL=1    -> private CV for job applications (kept out of the site)
+import { existsSync, readFileSync } from 'node:fs';
+import { education, experience, person, projects, skillLabels, skills, volunteering } from '../data/profile';
+
+// cv/private.json is git-ignored: { phone, bullets: { [company]: string[] } }.
+// Each string replaces the bullet at the same position for that company.
+type Private = { phone?: string; bullets?: Record<string, (string | null)[]> };
+const privateFile = 'cv/private.json';
+const full = process.env.CV_FULL === '1';
+if (full && !existsSync(privateFile)) throw new Error(`CV_FULL=1 needs ${privateFile}`);
+const priv: Private = full ? JSON.parse(readFileSync(privateFile, 'utf8')) : {};
+const line = (company: string, i: number, b: { text: string }) => priv.bullets?.[company]?.[i] ?? b.text;
+const short = (u: string) => u.replace(/^https?:\/\/(www\.)?/, '');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{person.name} - Resume</title>
+    <style is:inline>
+      @page { size: A4; margin: 9mm 12mm; }
+      * { box-sizing: border-box; }
+      html { background: #fff; }
+      body {
+        margin: 0 auto; max-width: 186mm; padding: 0;
+        font-family: Helvetica, Arial, sans-serif; font-size: 8.9pt; line-height: 1.29; color: #111;
+      }
+      @media screen { body { padding: 12mm; } }
+      a { color: #0b4fa8; text-decoration: none; }
+      h1 { font-size: 19pt; margin: 0 0 1pt; letter-spacing: -0.01em; }
+      .headline { font-size: 10pt; font-weight: 700; margin: 0 0 2pt; }
+      .contact { margin: 0; color: #333; }
+      h2 {
+        font-size: 10pt; margin: 7pt 0 3pt; padding-bottom: 1.5pt;
+        border-bottom: 0.75pt solid #999;
+      }
+      p { margin: 0 0 2pt; }
+      ul { margin: 1.5pt 0 0; padding-left: 12pt; }
+      li { margin-bottom: 1.2pt; }
+      .row { display: flex; justify-content: space-between; gap: 12pt; margin-top: 4pt; }
+      .row:first-of-type { margin-top: 0; }
+      .row strong { font-size: 9.4pt; }
+      .when { white-space: nowrap; color: #333; }
+      .skills { list-style: none; padding: 0; }
+      .skills li { margin-bottom: 0.8pt; }
+      section { break-inside: avoid; }
+    </style>
+  </head>
+  <body>
+    <h1>{person.name}</h1>
+    <p class="headline">{person.title}</p>
+    <p class="contact">
+      {person.location} (remote) | <a href={`mailto:${person.email}`}>{person.email}</a>
+      {priv.phone && <> | {priv.phone}</>}
+      {' | '}<a href={person.linkedin}>{short(person.linkedin)}</a>
+      {' | '}<a href={person.github}>{short(person.github)}</a>
+    </p>
+
+    <h2>Summary</h2>
+    <p>{person.cvSummary}</p>
+
+    <h2>Skills</h2>
+    <ul class="skills">
+      {
+        Object.entries(skills).map(([key, values]) => (
+          <li>
+            <strong>{skillLabels[key]}:</strong> {values.join(', ')}
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2>Experience</h2>
+    {
+      experience.map((job) => (
+        <section>
+          <div class="row">
+            <span>
+              <strong>{job.role}, {job.company}</strong>
+            </span>
+            <span class="when">{job.period} | {job.place}</span>
+          </div>
+          <ul>
+            {job.bullets.map((b, i) => <li>{line(job.company, i, b)}</li>)}
+          </ul>
+        </section>
+      ))
+    }
+
+    <h2>Projects</h2>
+    {
+      projects.map((p) => (
+        <section>
+          <div class="row">
+            <span>
+              <strong>{p.name}</strong> - {p.event.replace(',', '')}
+            </span>
+            <span class="when">
+              {p.links.map((l, i) => (
+                <>
+                  {i > 0 && ' | '}
+                  <a href={l.href}>{short(l.href)}</a>
+                </>
+              ))}
+            </span>
+          </div>
+          <ul>
+            <li>{p.cvLine}</li>
+          </ul>
+        </section>
+      ))
+    }
+
+    <h2>Volunteering</h2>
+    {
+      volunteering.map((job) => (
+        <section>
+          <div class="row">
+            <strong>{job.role}, {job.company}</strong>
+            <span class="when">{job.period}</span>
+          </div>
+          <ul>
+            {job.bullets.map((b, i) => <li>{line(job.company, i, b)}</li>)}
+          </ul>
+        </section>
+      ))
+    }
+
+    <h2>Education</h2>
+    {
+      education.map((e) => (
+        <div class="row">
+          <span>
+            <strong>{e.title}</strong>, {e.where}
+            {e.note ? `, ${e.note}` : ''}
+          </span>
+          <span class="when">{e.when}</span>
+        </div>
+      ))
+    }
+  </body>
+</html>

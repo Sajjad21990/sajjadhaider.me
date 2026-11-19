@@ -1,0 +1,64 @@
+---
+import Ide from '../../layouts/Ide.astro';
+import { person, projects, type Project } from '../../data/profile';
+
+export function getStaticPaths() {
+  return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+
+const { project } = Astro.props as { project: Project };
+---
+
+<Ide file={`projects/${project.slug}.md`} title={`${project.name} | ${person.name}`} description={project.oneLine}>
+  <article class="md">
+    <h1>{project.name}</h1>
+    <p class="meta">{project.event}</p>
+    <p class="lede">{project.oneLine}</p>
+
+    {
+      project.shots[0] && (
+        <figure class="shot">
+          <img
+            src={project.shots[0].src}
+            alt={project.shots[0].alt}
+            width={project.shots[0].width}
+            height={project.shots[0].height}
+          />
+        </figure>
+      )
+    }
+
+    <h2>The problem</h2>
+    <p>{project.problem}</p>
+
+    <h2>How it works</h2>
+    <ol>
+      {project.how.map((step) => <li>{step}</li>)}
+    </ol>
+
+    {
+      project.shots.slice(1).map((shot) => (
+        <figure class="shot">
+          <img src={shot.src} alt={shot.alt} width={shot.width} height={shot.height} loading="lazy" />
+        </figure>
+      ))
+    }
+
+    <h2>Built with</h2>
+    <ul class="chips">
+      {project.stack.map((s) => <li class="chip">{s}</li>)}
+    </ul>
+    {project.credit && <p>{project.credit}</p>}
+
+    <h2>Links</h2>
+    <ul>
+      {
+        project.links.map((l) => (
+          <li>
+            <a href={l.href}>{l.label}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </article>
+</Ide>
