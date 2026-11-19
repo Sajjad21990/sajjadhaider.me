@@ -1,0 +1,23 @@
+---
+import { projects } from '../data/profile';
+---
+
+<ul class="cards">
+  {
+    projects.map((p) => (
+      <li class="card">
+        <img class="card-shot" src={p.shots[0].src} alt="" width={p.shots[0].width} height={p.shots[0].height} loading="lazy" />
+        <div class="card-body">
+          <p class="card-event">{p.event}</p>
+          <h3>
+            <a href={`/projects/${p.slug}/`}>{p.name}</a>
+          </h3>
+          <p class="card-line">{p.oneLine}</p>
+          <ul class="chips">
+            {p.stack.slice(0, 3).map((s) => <li>'{s}'</li>)}
+          </ul>
+        </div>
+      </li>
+    ))
+  }
+</ul>

@@ -1,0 +1,20 @@
+---
+import Ide from '../../layouts/Ide.astro';
+import ProjectCards from '../../components/ProjectCards.astro';
+import { person } from '../../data/profile';
+---
+
+<Ide
+  file="projects/"
+  wide
+  title={`Projects | ${person.name}`}
+  description="Hackathon projects by Sajjad Haider Sayed: BotFare, Gatepass and Paper Seal."
+>
+  <article class="md">
+    <h1>Projects</h1>
+    <p class="lede">Three things I built at hackathons in 2026, each around payments, access or cryptography.</p>
+    <div style="margin-top: 2.4rem">
+      <ProjectCards />
+    </div>
+  </article>
+</Ide>

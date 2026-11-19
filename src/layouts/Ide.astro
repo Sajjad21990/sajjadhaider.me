@@ -1,13 +1,15 @@
 ---
 import '../styles/ide.css';
-import { files, person, resumeFile } from '../data/profile';
+import Icon from '../components/Icon.astro';
+import { files, person, projects, resumeFile } from '../data/profile';
 
 interface Props {
   file: string; // e.g. "README.md" or "projects/botfare.md"
   title: string;
   description: string;
+  wide?: boolean; // pages that lay out their own columns
 }
-const { file, title, description } = Astro.props;
+const { file, title, description, wide = false } = Astro.props;
 
 const pathOf = (f: (typeof files)[number]) => (f.dir ? `${f.dir}/${f.name}` : f.name);
 const current = files.find((f) => pathOf(f) === file);
@@ -17,18 +19,49 @@ const after = rootFiles.filter((f) => !['README.md', 'experience.md'].includes(f
 const projectFiles = files.filter((f) => f.dir === 'projects');
 const crumbs = file.split('/');
 const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
+
+const themes = [
+  { id: 'dusk', name: 'Dusk' },
+  { id: 'graphite', name: 'Graphite' },
+  { id: 'forest', name: 'Forest' },
+  { id: 'paper', name: 'Paper (light)' },
+];
+
+// Everything the command palette can do. Links navigate; themes and copy run in the page.
+const commands = [
+  ...files.map((f) => ({ group: 'Go to file', label: pathOf(f), href: f.href })),
+  { group: 'Go to file', label: 'projects/', href: '/projects/' },
+  ...themes.map((t) => ({ group: 'Theme', label: `Theme: ${t.name}`, theme: t.id })),
+  { group: 'Actions', label: 'Download resume (PDF)', href: resumeFile },
+  { group: 'Actions', label: 'Copy email address', copy: person.email },
+  { group: 'Actions', label: 'Message on WhatsApp', href: person.whatsapp.href },
+  { group: 'Actions', label: 'Open GitHub profile', href: person.github },
+  { group: 'Actions', label: 'Open LinkedIn profile', href: person.linkedin },
+];
+
+const section = Astro.url.pathname.split('/')[1] ?? '';
+const nav = [
+  { label: 'Home', href: '/', icon: 'home', on: section === '' },
+  { label: 'Work', href: '/experience/', icon: 'work', on: section === 'experience' },
+  { label: 'Projects', href: '/projects/', icon: 'projects', on: section === 'projects' },
+  { label: 'Skills', href: '/skills/', icon: 'skills', on: section === 'skills' },
+  { label: 'Contact', href: '/contact/', icon: 'mail', on: section === 'contact' },
+];
+const ogImage = new URL(projects[0].shots[0].src, Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dusk" data-terminal="closed">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImage} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -36,11 +69,14 @@ const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
       href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Martian+Mono:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <script is:inline>
+    <script is:inline define:vars={{ themeIds: themes.map((t) => t.id) }}>
       try {
         var t = localStorage.getItem('theme');
-        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-        if (localStorage.getItem('terminal') === 'closed') document.documentElement.dataset.terminal = 'closed';
+        if (t === 'dark') t = 'dusk';
+        if (t === 'light') t = 'paper';
+        if (themeIds.indexOf(t) > -1) document.documentElement.dataset.theme = t;
+        if (localStorage.getItem('terminal') === 'open') document.documentElement.dataset.terminal = 'open';
+        if (localStorage.getItem('explorer') === 'closed') document.documentElement.dataset.explorer = 'closed';
       } catch (e) {}
     </script>
   </head>
@@ -49,11 +85,39 @@ const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
 
     <div class="ide">
       <header class="titlebar">
-        <button class="menu-btn" type="button" aria-controls="explorer" aria-expanded="false" data-explorer-toggle>
-          Files
+        <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+        <a class="brand" href="/">sajjadhaider.me</a>
+        <button class="palette-open" type="button" data-palette-open aria-haspopup="dialog">
+          <Icon name="search" size={14} />
+          <span class="palette-open-text">Search files and commands</span>
+          <kbd data-mod-key>Ctrl K</kbd>
         </button>
-        <span class="titlebar-path"><span class="titlebar-root">sajjadhaider.me</span>/{file}</span>
+        <button class="title-btn" type="button" data-palette-open="Theme" aria-label="Change theme">
+          <Icon name="theme" size={17} />
+        </button>
       </header>
+
+      <div class="rail">
+        <button type="button" class="rail-btn" data-explorer-toggle aria-controls="explorer" aria-expanded="true" title="Explorer">
+          <Icon name="files" /><span class="sr-only">Toggle the file explorer</span>
+        </button>
+        <button type="button" class="rail-btn" data-palette-open title="Search">
+          <Icon name="search" /><span class="sr-only">Search files and commands</span>
+        </button>
+        <button type="button" class="rail-btn" data-palette-open="Theme" title="Theme">
+          <Icon name="theme" /><span class="sr-only">Change theme</span>
+        </button>
+        <button type="button" class="rail-btn" data-terminal-toggle title="Terminal">
+          <Icon name="terminal" /><span class="sr-only">Toggle the terminal</span>
+        </button>
+        <span class="rail-spacer"></span>
+        <a class="rail-btn" href={person.github} title="GitHub">
+          <Icon name="branch" /><span class="sr-only">GitHub profile</span>
+        </a>
+        <a class="rail-btn" href={resumeFile} title="Download resume">
+          <Icon name="download" /><span class="sr-only">Download resume</span>
+        </a>
+      </div>
 
       <nav class="explorer" id="explorer" aria-label="Files">
         <p class="explorer-head">Explorer</p>
@@ -71,7 +135,7 @@ const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
                 ))
               }
               <li>
-                <span class="tree-dir">projects</span>
+                <a class="tree-dir tree-dir-link" href="/projects/" aria-current={file === 'projects/' ? 'page' : undefined}>projects</a>
                 <ul>
                   {
                     projectFiles.map((f) => (
@@ -112,18 +176,21 @@ const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
       </div>
 
       <main class="editor" id="editor" tabindex="-1">
-        <p class="crumbs" aria-hidden="true">
-          {crumbs.map((c, i) => <span class={i === crumbs.length - 1 ? 'crumb crumb-last' : 'crumb'}>{c}</span>)}
-        </p>
-        <slot />
+        <div class:list={['page', { 'page-wide': wide }]}>
+          <p class="crumbs" aria-hidden="true">
+            <span class="crumb">sajjadhaider.me</span>
+            {crumbs.filter(Boolean).map((c, i, all) => <span class={i === all.length - 1 ? 'crumb crumb-last' : 'crumb'}>{c}</span>)}
+          </p>
+          <slot />
+        </div>
       </main>
 
       <section class="terminal" aria-label="Terminal">
         <div class="terminal-bar">
           <span class="terminal-title">Terminal</span>
-          <button type="button" class="terminal-toggle" data-terminal-toggle aria-expanded="true">Hide</button>
+          <button type="button" class="terminal-toggle" data-terminal-toggle>Close</button>
         </div>
-        <div class="terminal-body" data-terminal-body>
+        <div class="terminal-body">
           <div class="terminal-out" data-terminal-out aria-live="polite">
             <p>Type <kbd>help</kbd> to see what this terminal can do.</p>
           </div>
@@ -135,61 +202,109 @@ const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
       </section>
 
       <footer class="statusbar">
-        <span class="status-item">{current?.lang ?? 'Plain text'}</span>
-        <span class="status-item status-hide-sm">{person.location}</span>
+        <span class="status-item status-branch"><Icon name="branch" size={13} /> main</span>
+        <span class="status-item">{current?.lang ?? 'Markdown'}</span>
+        <span class="status-item">{person.location}</span>
         <span class="status-spacer"></span>
-        <button type="button" class="status-item status-btn" data-theme-toggle>Light theme</button>
+        <button type="button" class="status-item status-btn" data-terminal-toggle>Terminal</button>
+        <button type="button" class="status-item status-btn" data-palette-open="Theme">
+          Theme: <span data-theme-name>Dusk</span>
+        </button>
         <a class="status-item" href={resumeFile}>Download resume</a>
-        <a class="status-item status-hide-sm" href={person.github}>GitHub</a>
       </footer>
+
+      <nav class="bottomnav" aria-label="Sections">
+        {
+          nav.map((n) => (
+            <a href={n.href} aria-current={n.on ? 'page' : undefined}>
+              <Icon name={n.icon} size={20} />
+              <span>{n.label}</span>
+            </a>
+          ))
+        }
+      </nav>
     </div>
 
-    <script is:inline define:vars={{ terminalFiles, resumeFile, email: person.email }}>
+    <dialog class="palette" data-palette aria-label="Search files and commands">
+      <form method="dialog" class="palette-form" data-palette-form>
+        <Icon name="search" size={16} />
+        <input
+          type="text"
+          data-palette-input
+          placeholder="Type a file name or a command"
+          aria-label="Search files and commands"
+          autocomplete="off"
+          spellcheck="false"
+          role="combobox"
+          aria-expanded="true"
+          aria-controls="palette-list"
+        />
+        <button type="button" class="palette-close" data-palette-close>Esc</button>
+      </form>
+      <ul class="palette-list" id="palette-list" role="listbox" data-palette-list></ul>
+      <p class="palette-empty" data-palette-empty hidden>Nothing matches. Try “resume” or “theme”.</p>
+    </dialog>
+
+    <p class="toast" role="status" aria-live="polite" data-toast></p>
+
+    <script is:inline define:vars={{ terminalFiles, resumeFile, email: person.email, commands, themes }}>
       (function () {
         var root = document.documentElement;
+        var isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+        function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+        function each(sel, fn) { Array.prototype.forEach.call(document.querySelectorAll(sel), fn); }
 
-        // Theme toggle
-        var themeBtn = document.querySelector('[data-theme-toggle]');
-        function labelTheme() {
-          themeBtn.textContent = root.dataset.theme === 'dark' ? 'Light theme' : 'Dark theme';
+        var toast = document.querySelector('[data-toast]');
+        var toastTimer;
+        function say(text) {
+          toast.textContent = text;
+          toast.dataset.show = 'true';
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () { toast.dataset.show = 'false'; }, 1800);
         }
-        function setTheme(t) {
-          root.dataset.theme = t;
-          try { localStorage.setItem('theme', t); } catch (e) {}
+
+        // Themes
+        function themeName(id) {
+          for (var i = 0; i < themes.length; i++) if (themes[i].id === id) return themes[i].name;
+          return id;
+        }
+        function labelTheme() {
+          each('[data-theme-name]', function (el) { el.textContent = themeName(root.dataset.theme); });
+        }
+        function setTheme(id) {
+          root.dataset.theme = id;
+          store('theme', id);
           labelTheme();
         }
         labelTheme();
-        themeBtn.addEventListener('click', function () {
-          setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
-        });
 
-        // Explorer drawer (small screens)
-        var exBtn = document.querySelector('[data-explorer-toggle]');
-        exBtn.addEventListener('click', function () {
-          var open = root.dataset.explorer === 'open';
-          root.dataset.explorer = open ? 'closed' : 'open';
-          exBtn.setAttribute('aria-expanded', String(!open));
-        });
-
-        // Terminal show / hide
-        var termBtn = document.querySelector('[data-terminal-toggle]');
-        function labelTerm() {
-          var closed = root.dataset.terminal === 'closed';
-          termBtn.textContent = closed ? 'Show' : 'Hide';
-          termBtn.setAttribute('aria-expanded', String(!closed));
+        // Explorer: a column on wide screens that the rail can collapse
+        function labelExplorer() {
+          var open = root.dataset.explorer !== 'closed';
+          each('[data-explorer-toggle]', function (b) { b.setAttribute('aria-expanded', String(open)); });
         }
-        labelTerm();
-        termBtn.addEventListener('click', function () {
-          var closed = root.dataset.terminal === 'closed';
-          root.dataset.terminal = closed ? 'open' : 'closed';
-          try { localStorage.setItem('terminal', closed ? 'open' : 'closed'); } catch (e) {}
-          labelTerm();
+        each('[data-explorer-toggle]', function (b) {
+          b.addEventListener('click', function () {
+            var next = root.dataset.explorer === 'closed' ? 'open' : 'closed';
+            root.dataset.explorer = next;
+            store('explorer', next);
+            labelExplorer();
+          });
         });
+        labelExplorer();
 
-        // Terminal commands
+        // Terminal
+        var termInput = document.getElementById('terminal-input');
+        function toggleTerminal() {
+          var open = root.dataset.terminal === 'open';
+          root.dataset.terminal = open ? 'closed' : 'open';
+          store('terminal', open ? 'closed' : 'open');
+          if (!open) termInput.focus();
+        }
+        each('[data-terminal-toggle]', function (b) { b.addEventListener('click', toggleTerminal); });
+
         var out = document.querySelector('[data-terminal-out]');
         var form = document.querySelector('[data-terminal-form]');
-        var input = form.querySelector('input');
         var history = [];
         var cursor = 0;
 
@@ -200,7 +315,6 @@ const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
           out.appendChild(p);
           out.scrollTop = out.scrollHeight;
         }
-
         function findFile(name) {
           if (!name) return null;
           var q = name.replace(/^\.?\//, '').toLowerCase();
@@ -211,14 +325,13 @@ const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
           }
           return null;
         }
-
-        var commands = {
+        var terminal = {
           help: function () {
             print('ls              list the files');
             print('open <file>     open a file, for example: open experience');
             print('resume          download the resume PDF');
             print('email           show the email address');
-            print('theme           switch between dark and light');
+            print('theme <name>    switch theme: ' + themes.map(function (t) { return t.id; }).join(', '));
             print('clear           clear this terminal');
           },
           ls: function () {
@@ -226,51 +339,149 @@ const terminalFiles = files.map((f) => ({ path: pathOf(f), href: f.href }));
             print('resume.pdf');
           },
           open: function (arg) {
-            if (arg === 'resume.pdf' || arg === 'resume') return commands.resume();
+            if (arg === 'resume.pdf' || arg === 'resume') return terminal.resume();
             var f = findFile(arg);
             if (!f) return print('No file called "' + (arg || '') + '". Type ls to see the files.', 'err');
             print('Opening ' + f.path);
             location.href = f.href;
           },
-          cat: function (arg) { commands.open(arg); },
-          cd: function (arg) { commands.open(arg); },
+          cat: function (arg) { terminal.open(arg); },
+          cd: function (arg) { terminal.open(arg); },
           resume: function () {
             print('Downloading resume.pdf');
             location.href = resumeFile;
           },
           email: function () { print(email); },
           whoami: function () { print('visitor'); },
-          theme: function () {
-            setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
-            print('Theme is now ' + root.dataset.theme + '.');
+          theme: function (arg) {
+            var ids = themes.map(function (t) { return t.id; });
+            var next = arg ? arg.toLowerCase() : ids[(ids.indexOf(root.dataset.theme) + 1) % ids.length];
+            if (ids.indexOf(next) < 0) return print('No theme called "' + arg + '". Try: ' + ids.join(', '), 'err');
+            setTheme(next);
+            print('Theme is now ' + next + '.');
           },
           clear: function () { out.innerHTML = ''; },
         };
-
         form.addEventListener('submit', function (e) {
           e.preventDefault();
-          var line = input.value.trim();
-          input.value = '';
+          var line = termInput.value.trim();
+          termInput.value = '';
           if (!line) return;
           history.push(line);
           cursor = history.length;
           print('$ ' + line, 'echo');
           var parts = line.split(/\s+/);
-          var fn = commands[parts[0].toLowerCase()];
+          var fn = terminal[parts[0].toLowerCase()];
           if (fn) fn(parts.slice(1).join(' '));
           else print('Unknown command "' + parts[0] + '". Type help to see the commands.', 'err');
         });
-
-        input.addEventListener('keydown', function (e) {
+        termInput.addEventListener('keydown', function (e) {
           if (e.key === 'ArrowUp' && cursor > 0) {
-            cursor--; input.value = history[cursor]; e.preventDefault();
+            cursor--; termInput.value = history[cursor]; e.preventDefault();
           } else if (e.key === 'ArrowDown') {
             cursor = Math.min(cursor + 1, history.length);
-            input.value = history[cursor] || ''; e.preventDefault();
+            termInput.value = history[cursor] || ''; e.preventDefault();
           }
         });
 
-        // Keep the active tab in view on narrow screens
+        // Command palette
+        var dialog = document.querySelector('[data-palette]');
+        var pInput = document.querySelector('[data-palette-input]');
+        var pList = document.querySelector('[data-palette-list]');
+        var pEmpty = document.querySelector('[data-palette-empty]');
+        var shown = [];
+        var active = 0;
+
+        function copy(text) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () { say('Email address copied'); }, function () { say(text); });
+          } else say(text);
+        }
+        function run(cmd) {
+          if (!cmd) return;
+          if (cmd.theme) { setTheme(cmd.theme); render(); return; }
+          dialog.close();
+          if (cmd.copy) copy(cmd.copy);
+          else if (cmd.href) location.href = cmd.href;
+        }
+        function mark() {
+          Array.prototype.forEach.call(pList.querySelectorAll('[role="option"]'), function (li, i) {
+            li.setAttribute('aria-selected', String(i === active));
+            if (i === active) {
+              pInput.setAttribute('aria-activedescendant', li.id);
+              li.scrollIntoView({ block: 'nearest' });
+            }
+          });
+        }
+        function render() {
+          var q = pInput.value.trim().toLowerCase();
+          shown = commands.filter(function (c) {
+            return !q || (c.label + ' ' + c.group).toLowerCase().indexOf(q) > -1;
+          });
+          if (active >= shown.length) active = 0;
+          pList.innerHTML = '';
+          var group = '';
+          shown.forEach(function (c, i) {
+            if (c.group !== group) {
+              group = c.group;
+              var h = document.createElement('li');
+              h.className = 'palette-group';
+              h.setAttribute('role', 'presentation');
+              h.textContent = group;
+              pList.appendChild(h);
+            }
+            var li = document.createElement('li');
+            li.id = 'palette-option-' + i;
+            li.setAttribute('role', 'option');
+            li.textContent = c.label;
+            if (c.theme && c.theme === root.dataset.theme) li.dataset.current = 'true';
+            li.addEventListener('click', function () { active = i; run(c); });
+            li.addEventListener('mousemove', function () { if (active !== i) { active = i; mark(); } });
+            pList.appendChild(li);
+          });
+          pEmpty.hidden = shown.length > 0;
+          mark();
+        }
+        function openPalette(prefill) {
+          if (dialog.open) return;
+          pInput.value = prefill || '';
+          active = 0;
+          render();
+          dialog.showModal();
+          pInput.focus();
+        }
+        each('[data-palette-open]', function (b) {
+          b.addEventListener('click', function () { openPalette(b.getAttribute('data-palette-open')); });
+        });
+        document.querySelector('[data-palette-close]').addEventListener('click', function () { dialog.close(); });
+        dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
+        pInput.addEventListener('input', function () { active = 0; render(); });
+        document.querySelector('[data-palette-form]').addEventListener('submit', function (e) {
+          e.preventDefault();
+          run(shown[active]);
+        });
+        pInput.addEventListener('keydown', function (e) {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (!shown.length) return;
+            active = (active + (e.key === 'ArrowDown' ? 1 : shown.length - 1)) % shown.length;
+            mark();
+          }
+        });
+
+        each('[data-mod-key]', function (k) { k.textContent = isMac ? '⌘K' : 'Ctrl K'; });
+        document.addEventListener('keydown', function (e) {
+          var mod = e.metaKey || e.ctrlKey;
+          if (mod && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette(''); }
+          else if (e.ctrlKey && e.key === '`') { e.preventDefault(); toggleTerminal(); }
+        });
+
+        // Copy buttons inside pages
+        each('[data-copy]', function (b) {
+          b.addEventListener('click', function () { copy(b.getAttribute('data-copy')); });
+        });
+
+        // Keep the active tab in view
         var activeTab = document.querySelector('.tab[aria-current="page"]');
         if (activeTab && activeTab.scrollIntoView) activeTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       })();

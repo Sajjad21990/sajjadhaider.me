@@ -1,49 +1,74 @@
 ---
 import Ide from '../layouts/Ide.astro';
-import { person, projects, resumeFile } from '../data/profile';
+import Icon from '../components/Icon.astro';
+import ProjectCards from '../components/ProjectCards.astro';
+import { objectLines } from '../lib/code';
+import { experience, person, resumeFile } from '../data/profile';
+
+const current = experience[0];
+const code = objectLines('sajjad', {
+  role: 'Full-stack + infra',
+  based: person.location,
+  years: '5+',
+  now: current.company,
+  web: ['TypeScript', 'React', 'Node.js'],
+  cloud: ['AWS', 'GCP', 'Terraform'],
+  web3: ['zkTLS', 'TEEs'],
+});
 ---
 
 <Ide
   file="README.md"
+  wide
   title={`${person.name}, ${person.title}`}
   description="Sajjad Haider Sayed is a full-stack and infrastructure engineer in Mumbai, working with TypeScript, React, Node.js, AWS, GCP and Terraform."
 >
   <article class="md">
-    <h1>{person.name}</h1>
-    <p class="meta">{person.title}, {person.location}</p>
-    <p class="lede">{person.intro}</p>
+    <header class="hero">
+      <div>
+        <p class="hero-now">{current.role} at {current.company}</p>
+        <h1>Sajjad Haider Sayed</h1>
+        <p class="hero-role">{person.title}</p>
+        <p class="hero-intro">{person.intro}</p>
+        <p class="actions">
+          <a class="btn btn-primary" href="/experience/">See my work <Icon name="arrow" size={15} /></a>
+          <a class="btn" href={resumeFile}><Icon name="download" size={15} /> Download resume</a>
+        </p>
+      </div>
+      <div class="codecard">
+        <div class="codecard-bar"><span>sajjad.ts</span><span>TypeScript</span></div>
+        <pre class="code" aria-label="A short profile written as TypeScript">{code.map((html, i) => (
+          <span class="code-line" style={`--i:${i}`} set:html={html} />
+        ))}</pre>
+      </div>
+    </header>
+
+    <h2>Projects</h2>
+    <ProjectCards />
+
+    <h2>Experience</h2>
+    <ul class="rows">
+      {
+        experience.map((job) => (
+          <li>
+            <span class="rows-when">{job.period}</span>
+            <span class="rows-what">
+              <a href="/experience/">{job.role}</a> <span>at {job.company}</span>
+            </span>
+            <span class="rows-note">{job.place}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2>Now</h2>
     <p>{person.now}</p>
     <p>
       Outside work I build things at hackathons, mostly where payments, access and cryptography meet, and I volunteer as a
       developer for the <a href="https://anfaalfoundation.com">Anfaal Foundation</a>.
     </p>
-
-    <h2>In this repository</h2>
-    <ul class="file-list">
-      <li>
-        <a href="/experience/">experience.md</a>
-        <span>Where I have worked and what I built there.</span>
-      </li>
-      {
-        projects.map((p) => (
-          <li>
-            <a href={`/projects/${p.slug}/`}>projects/{p.slug}.md</a>
-            <span>{p.oneLine}</span>
-          </li>
-        ))
-      }
-      <li>
-        <a href="/skills/">skills.json</a>
-        <span>The languages, frameworks and cloud tools I use.</span>
-      </li>
-      <li>
-        <a href="/contact/">contact.md</a>
-        <span>Email, GitHub and LinkedIn.</span>
-      </li>
-      <li>
-        <a href={resumeFile}>resume.pdf</a>
-        <span>All of this on one page.</span>
-      </li>
-    </ul>
+    <p class="actions">
+      <a class="btn" href="/contact/"><Icon name="mail" size={15} /> Get in touch</a>
+    </p>
   </article>
 </Ide>

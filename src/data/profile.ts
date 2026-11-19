@@ -1,7 +1,7 @@
 // Single source of truth for the site and the resume.
 // Everything in this file is public. The private CV build (CV_FULL=1) reads
-// the phone number and numeric bullet variants from cv/private.json, which is
-// git-ignored and never deployed.
+// the numeric bullet variants from cv/private.json, which is git-ignored and
+// never deployed.
 
 export const person = {
   name: 'Sajjad Haider Sayed',
@@ -11,6 +11,8 @@ export const person = {
   github: 'https://github.com/Sajjad21990',
   linkedin: 'https://www.linkedin.com/in/sajjad21990',
   x: 'https://x.com/Sajjad21990',
+  // Public on purpose: shown on the contact page for WhatsApp.
+  whatsapp: { display: '+91 70457 96217', href: 'https://wa.me/917045796217' },
   intro:
     'I build web products end to end and run the cloud infrastructure under them. For the last five years that has meant TypeScript, React and Node.js on one side, and AWS, GCP and Terraform on the other.',
   now: 'I work at Reclaim Protocol (YC W21), where we build privacy-preserving verification on zkTLS. I write backend services and SDKs, look after the infrastructure and CI/CD, and serve as the team’s InfoSec officer.',
@@ -27,6 +29,7 @@ export type Job = {
   period: string;
   place: string;
   about?: string;
+  stack?: string[];
   bullets: Bullet[];
 };
 
@@ -38,6 +41,7 @@ export const experience: Job[] = [
     period: 'May 2024 – Present',
     place: 'Remote',
     about: 'Privacy-preserving identity and data verification using zkTLS.',
+    stack: ['TypeScript', 'Node.js', 'AWS', 'GCP', 'OpenTofu', 'GitHub Actions', 'Next.js', 'Firebase'],
     bullets: [
       {
         text: 'Leading the migration of production services from Elastic Beanstalk to ECS Fargate, with the infrastructure on AWS and GCP managed as code in OpenTofu/Terraform.',
@@ -64,6 +68,7 @@ export const experience: Job[] = [
     company: 'Nine Lights Technologies',
     period: 'Oct 2022 – May 2024',
     place: 'Remote',
+    stack: ['React', 'Next.js', 'TypeScript', 'Firebase', 'Three.js', 'A-Frame', 'WebAssembly'],
     bullets: [
       {
         text: 'Built online multiplayer team-building games and their admin tools for Team Building Games Co (TBGC) with React, Next.js, TypeScript and Firebase, including The Mavericks, Squad Games and Now You Know Me, played by corporate clients including Fortune 500 companies.',
@@ -93,6 +98,7 @@ export const experience: Job[] = [
     company: 'Self-employed',
     period: 'Oct 2020 – Oct 2021',
     place: 'Mumbai',
+    stack: ['WordPress', 'React'],
     bullets: [
       {
         text: 'Delivered 10+ websites for small businesses with WordPress, React and custom code, from design through hosting.',
@@ -108,6 +114,7 @@ export const volunteering: Job[] = [
     url: 'https://anfaalfoundation.com',
     period: '2026 – Present',
     place: 'Mumbai',
+    stack: ['Next.js', 'Firebase'],
     bullets: [
       {
         text: 'Built Smart Portal, the NGO’s central portal for scholarship, ration and other aid services, covering family applications, committee review, finance and audit logs (Next.js, Firebase), and its mentorship portal.',

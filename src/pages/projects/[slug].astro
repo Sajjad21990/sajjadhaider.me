@@ -1,5 +1,6 @@
 ---
 import Ide from '../../layouts/Ide.astro';
+import Icon from '../../components/Icon.astro';
 import { person, projects, type Project } from '../../data/profile';
 
 export function getStaticPaths() {
@@ -7,13 +8,28 @@ export function getStaticPaths() {
 }
 
 const { project } = Astro.props as { project: Project };
+const at = projects.findIndex((p) => p.slug === project.slug);
+const prev = projects[(at + projects.length - 1) % projects.length];
+const next = projects[(at + 1) % projects.length];
 ---
 
 <Ide file={`projects/${project.slug}.md`} title={`${project.name} | ${person.name}`} description={project.oneLine}>
   <article class="md">
-    <h1>{project.name}</h1>
     <p class="meta">{project.event}</p>
+    <h1>{project.name}</h1>
     <p class="lede">{project.oneLine}</p>
+    <ul class="chips">
+      {project.stack.map((s) => <li>'{s}'</li>)}
+    </ul>
+    <p class="actions">
+      {
+        project.links.map((l, i) => (
+          <a class:list={['btn', { 'btn-primary': i === 0 }]} href={l.href}>
+            {l.label} <Icon name="external" size={15} />
+          </a>
+        ))
+      }
+    </p>
 
     {
       project.shots[0] && (
@@ -32,7 +48,7 @@ const { project } = Astro.props as { project: Project };
     <p>{project.problem}</p>
 
     <h2>How it works</h2>
-    <ol>
+    <ol class="steps">
       {project.how.map((step) => <li>{step}</li>)}
     </ol>
 
@@ -44,21 +60,11 @@ const { project } = Astro.props as { project: Project };
       ))
     }
 
-    <h2>Built with</h2>
-    <ul class="chips">
-      {project.stack.map((s) => <li class="chip">{s}</li>)}
-    </ul>
-    {project.credit && <p>{project.credit}</p>}
+    {project.credit && <p class="about">{project.credit}</p>}
 
-    <h2>Links</h2>
-    <ul>
-      {
-        project.links.map((l) => (
-          <li>
-            <a href={l.href}>{l.label}</a>
-          </li>
-        ))
-      }
-    </ul>
+    <nav class="pager" aria-label="More projects">
+      <a href={`/projects/${prev.slug}/`}><small>Previous project</small>{prev.name}</a>
+      <a href={`/projects/${next.slug}/`}><small>Next project</small>{next.name}</a>
+    </nav>
   </article>
 </Ide>

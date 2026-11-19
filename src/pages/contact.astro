@@ -1,40 +1,44 @@
 ---
 import Ide from '../layouts/Ide.astro';
 import { person, resumeFile } from '../data/profile';
+
+const links = [
+  { label: 'WhatsApp', text: person.whatsapp.display, href: person.whatsapp.href, note: 'Message me on WhatsApp' },
+  { label: 'GitHub', text: 'github.com/Sajjad21990', href: person.github, note: 'Side projects and hackathon builds' },
+  { label: 'LinkedIn', text: 'linkedin.com/in/sajjad21990', href: person.linkedin, note: 'Work history' },
+  { label: 'X', text: 'x.com/Sajjad21990', href: person.x, note: 'Demos and build notes' },
+  { label: 'Resume', text: 'resume.pdf', href: resumeFile, note: 'One page' },
+];
 ---
 
 <Ide
   file="contact.md"
   title={`Contact | ${person.name}`}
-  description="How to reach Sajjad Haider Sayed: email, GitHub and LinkedIn."
+  description="How to reach Sajjad Haider Sayed: email, WhatsApp, GitHub and LinkedIn."
 >
   <article class="md">
     <h1>Contact</h1>
     <p class="lede">Email is the fastest way to reach me.</p>
 
-    <ul class="file-list">
-      <li>
-        <a href={`mailto:${person.email}`}>{person.email}</a>
-        <span>Email</span>
-      </li>
-      <li>
-        <a href={person.github}>github.com/Sajjad21990</a>
-        <span>Side projects, hackathon builds and other code</span>
-      </li>
-      <li>
-        <a href={person.linkedin}>linkedin.com/in/sajjad21990</a>
-        <span>Work history</span>
-      </li>
-      <li>
-        <a href={person.x}>x.com/Sajjad21990</a>
-        <span>Demos and build notes</span>
-      </li>
-      <li>
-        <a href={resumeFile}>resume.pdf</a>
-        <span>One-page resume</span>
-      </li>
+    <p class="contact-email">
+      <a href={`mailto:${person.email}`}>{person.email}</a>
+      <button type="button" class="btn" data-copy={person.email}>Copy address</button>
+    </p>
+
+    <ul class="rows">
+      {
+        links.map((l) => (
+          <li>
+            <span class="rows-when">{l.label}</span>
+            <span class="rows-what">
+              <a href={l.href}>{l.text}</a>
+            </span>
+            <span class="rows-note">{l.note}</span>
+          </li>
+        ))
+      }
     </ul>
 
-    <p class="meta">Based in {person.location} (UTC+5:30).</p>
+    <p class="meta" style="margin-top: 2rem">Based in {person.location} (UTC+5:30).</p>
   </article>
 </Ide>
