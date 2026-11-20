@@ -8,6 +8,7 @@ export const person = {
   title: 'Full-Stack and Infrastructure Engineer',
   location: 'Mumbai, India',
   email: 'sajjadhaider21990@gmail.com',
+  website: 'https://sajjadhaider.me',
   github: 'https://github.com/Sajjad21990',
   linkedin: 'https://www.linkedin.com/in/sajjad21990',
   x: 'https://x.com/Sajjad21990',
@@ -45,22 +46,22 @@ export const experience: Job[] = [
     stack: ['TypeScript', 'Node.js', 'AWS', 'GCP', 'OpenTofu', 'GitHub Actions', 'Next.js', 'Firebase'],
     bullets: [
       {
-        text: 'Leading the migration of production services from Elastic Beanstalk to ECS Fargate, with the infrastructure on AWS and GCP managed as code in OpenTofu/Terraform.',
+        text: 'Lead the status match loyalty program with several airlines: built the full-stack product (Next.js, Firebase) that lets travellers prove their status with another airline and get it matched.',
       },
       {
-        text: 'Built the shared CI/CD pipeline that the service repositories deploy through, with automated deploys and rollbacks on GitHub Actions.',
+        text: 'Own the company’s AWS and GCP infrastructure, managed as code in OpenTofu/Terraform.',
       },
       {
-        text: 'Set up monitoring, alerting, autoscaling and external uptime checks for the production API.',
+        text: 'Ran the migration of production services from Elastic Beanstalk to ECS Fargate, and built the CI/CD pipeline the service repositories deploy through on GitHub Actions.',
       },
       {
-        text: 'InfoSec officer for a team of about 30 engineers: access control, audit evidence, security reviews and disaster-recovery drills.',
+        text: 'InfoSec officer for a team of about 30 engineers: access control, security reviews and disaster-recovery drills; helped the company get SOC 2 Type 2 compliance.',
       },
       {
-        text: 'Develop the core SDK backend in Node.js and TypeScript, and built the browser extension SDK that lets partners run verifications inside Chrome.',
+        text: 'Work on API security and scaling: monitoring, alerting, autoscaling and external uptime checks for the production API.',
       },
       {
-        text: 'Built a full-stack loyalty status-matching product with Next.js and Firebase for airline partners, with admin roles, review workflows and scheduled exports.',
+        text: 'Built the browser extension SDK, which generates zero-knowledge proofs inside Chrome, and work on the core JavaScript SDK and its Node.js backend.',
       },
     ],
   },
@@ -72,7 +73,7 @@ export const experience: Job[] = [
     stack: ['React', 'Next.js', 'TypeScript', 'Firebase', 'Three.js', 'A-Frame', 'WebAssembly'],
     bullets: [
       {
-        text: 'Built online multiplayer team-building games and their admin tools for Team Building Games Co (TBGC) with React, Next.js, TypeScript and Firebase, including The Mavericks, Squad Games and Now You Know Me, played by corporate clients including Fortune 500 companies.',
+        text: 'Built 30+ online multiplayer team-building games and their admin tools for Team Building Games Co (TBGC) with React, Next.js, TypeScript and Firebase, including The Mavericks, Squad Games and Gold Rush, played by corporate clients including Fortune 500 companies.',
       },
       {
         text: 'Built AR and VR game experiences in the browser with A-Frame, MindAR and Three.js, and map-based hunts on the Google Maps API.',
@@ -113,7 +114,7 @@ export const volunteering: Job[] = [
     role: 'Volunteer Developer',
     company: 'Anfaal Foundation',
     url: 'https://anfaalfoundation.com',
-    period: '2026 – Present',
+    period: 'Mar 2026 – Present',
     place: 'Mumbai',
     stack: ['Next.js', 'Firebase'],
     bullets: [
@@ -262,16 +263,16 @@ export const skills: Record<string, string[]> = {
   frontend: ['React', 'Next.js', 'Tailwind CSS', 'A-Frame', 'Three.js', 'WebAssembly', 'Browser extensions'],
   backend: ['Node.js', 'Express', 'Flask', 'REST APIs', 'Webhooks', 'PostgreSQL', 'MongoDB', 'Firestore', 'Redis'],
   cloud: ['AWS (ECS Fargate, RDS, ALB, WAF, S3)', 'GCP', 'Firebase', 'Terraform / OpenTofu', 'Docker', 'GitHub Actions'],
-  reliabilityAndSecurity: ['Monitoring and alerting', 'BC/DR drills', 'Access control', 'Audits', 'Vulnerability scanning'],
+  devopsAndSecurity: ['CI/CD', 'Infrastructure as Code', 'Monitoring and alerting', 'BC/DR drills', 'Access control', 'SOC 2 audits'],
   web3: ['zkTLS proofs', 'TEEs', 'ethers.js', 'On-chain attestations'],
 };
 
 export const skillLabels: Record<string, string> = {
   languages: 'Languages',
-  frontend: 'Front end',
-  backend: 'Back end',
+  frontend: 'Frontend',
+  backend: 'Backend',
   cloud: 'Cloud and infra',
-  reliabilityAndSecurity: 'Reliability and security',
+  devopsAndSecurity: 'DevOps and security',
   web3: 'Web3',
 };
 

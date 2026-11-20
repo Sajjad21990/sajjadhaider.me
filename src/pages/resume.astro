@@ -6,9 +6,9 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { education, experience, person, projects, skillLabels, skills, volunteering } from '../data/profile';
 
-// cv/private.json is git-ignored: { phone, bullets: { [company]: string[] } }.
+// cv/private.json is git-ignored: { phone, summary, skillsRemove, bullets: { [company]: string[] } }.
 // Each string replaces the bullet at the same position for that company.
-type Private = { phone?: string; bullets?: Record<string, (string | null)[]> };
+type Private = { phone?: string; summary?: string; skillsRemove?: string[]; bullets?: Record<string, (string | null)[]> };
 const privateFile = 'cv/private.json';
 const full = process.env.CV_FULL === '1';
 if (full && !existsSync(privateFile)) throw new Error(`CV_FULL=1 needs ${privateFile}`);
@@ -51,27 +51,29 @@ const short = (u: string) => u.replace(/^https?:\/\/(www\.)?/, '');
       .skills { list-style: none; padding: 0; }
       .skills li { margin-bottom: 0.8pt; }
       section { break-inside: avoid; }
+      .edu { margin: 0 0 1.5pt; }
     </style>
   </head>
   <body>
     <h1>{person.name}</h1>
-    <p class="headline">{person.title}</p>
+    <p class="headline">{person.title} | {person.location}</p>
     <p class="contact">
-      {person.location} (remote) | <a href={`mailto:${person.email}`}>{person.email}</a>
+      <a href={`mailto:${person.email}`}>{person.email}</a>
       {priv.phone && <> | {priv.phone}</>}
+      {' | '}<a href={person.website}>{short(person.website)}</a>
       {' | '}<a href={person.linkedin}>{short(person.linkedin)}</a>
       {' | '}<a href={person.github}>{short(person.github)}</a>
     </p>
 
     <h2>Summary</h2>
-    <p>{person.cvSummary}</p>
+    <p>{priv.summary ?? person.cvSummary}</p>
 
     <h2>Skills</h2>
     <ul class="skills">
       {
         Object.entries(skills).map(([key, values]) => (
           <li>
-            <strong>{skillLabels[key]}:</strong> {values.join(', ')}
+            <strong>{skillLabels[key]}:</strong> {values.filter((v) => !priv.skillsRemove?.includes(v)).join(', ')}
           </li>
         ))
       }
@@ -136,13 +138,10 @@ const short = (u: string) => u.replace(/^https?:\/\/(www\.)?/, '');
     <h2>Education</h2>
     {
       education.map((e) => (
-        <div class="row">
-          <span>
-            <strong>{e.title}</strong>, {e.where}
-            {e.note ? `, ${e.note}` : ''}
-          </span>
-          <span class="when">{e.when}</span>
-        </div>
+        <p class="edu">
+          <strong>{e.title}</strong>, {e.where}
+          {e.note ? `, ${e.note}` : ''} | {e.when}
+        </p>
       ))
     }
   </body>
